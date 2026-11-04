@@ -1,4 +1,4 @@
-public class Payment {
+public class Payment implements Payable {
     private String method;
     private double amount;
     private boolean paid;
@@ -9,12 +9,24 @@ public class Payment {
         this.paid = false;
     }
 
+    // Factory Method Pattern (Milestone 5): Tạo đối tượng Payment tự động theo lựa chọn
+    public static Payment create(int choice, double amount) {
+        if (choice == 1) {
+            return new Payment("Cash on delivery", amount);
+        }
+        Payment payment = new Payment("Bank transfer (demo)", amount);
+        payment.processPayment();
+        return payment;
+    }
+
+    @Override
     public void processPayment() {
-        // Demo only: mark payment as successful; no real money is transferred.
         paid = true;
     }
 
     public String getMethod() { return method; }
     public double getAmount() { return amount; }
+
+    @Override
     public boolean isPaid() { return paid; }
 }

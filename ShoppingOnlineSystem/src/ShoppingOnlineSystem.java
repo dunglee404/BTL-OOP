@@ -9,6 +9,7 @@ public class ShoppingOnlineSystem {
     private int nextProductId = 4;
     private int nextOrderId = 1;
 
+    // Khởi tạo dữ liệu mẫu ban đầu
     public ShoppingOnlineSystem() {
         users.add(new Admin("A001", "admin", "admin123"));
         users.add(new Customer("C001", "quan", "123456"));
@@ -22,7 +23,8 @@ public class ShoppingOnlineSystem {
         new ShoppingOnlineSystem().run();
     }
 
-    private void run() {
+    // ==================== MENU CHÍNH ====================
+    public void run() {
         while (true) {
             System.out.println("\n===== SHOPPING ONLINE SYSTEM =====");
             System.out.println("1. Login");
@@ -40,6 +42,7 @@ public class ShoppingOnlineSystem {
         sc.close();
     }
 
+    // ==================== PHẦN 1: TÀI KHOẢN & ĐĂNG NHẬP ====================
     private void login() {
         System.out.print("Username: ");
         String username = sc.nextLine().trim();
@@ -82,28 +85,17 @@ public class ShoppingOnlineSystem {
         System.out.println("Registration successful. Your customer ID is " + id + ".");
     }
 
-    private void customerMenu(Customer customer) {
-        while (true) {
-            System.out.println("\n===== CUSTOMER MENU =====");
-            System.out.println("1. View products");
-            System.out.println("2. Add product to cart");
-            System.out.println("3. View cart");
-            System.out.println("4. Checkout");
-            System.out.println("5. View order history");
-            System.out.println("6. Change password");
-            System.out.println("0. Logout");
-            int choice = readInt("Choose: ");
-            if (choice == 1) showProducts();
-            else if (choice == 2) addToCart(customer);
-            else if (choice == 3) showCart(customer);
-            else if (choice == 4) checkout(customer);
-            else if (choice == 5) showOrderHistory(customer);
-            else if (choice == 6) changePassword(customer);
-            else if (choice == 0) return;
-            else System.out.println("Invalid choice.");
-        }
+    private void changePassword(User user) {
+        System.out.print("Current password: ");
+        String oldPassword = sc.nextLine();
+        System.out.print("New password: ");
+        String newPassword = sc.nextLine();
+        if (user.changePassword(oldPassword, newPassword))
+            System.out.println("Password changed successfully.");
+        else System.out.println("Password change failed. Check your current password and new password.");
     }
 
+    // ==================== PHẦN 2: SẢN PHẨM & ADMIN ====================
     private void adminMenu(Admin admin) {
         while (true) {
             System.out.println("\n===== ADMIN MENU =====");
@@ -128,6 +120,47 @@ public class ShoppingOnlineSystem {
             if (product.getId().equalsIgnoreCase(id)) return product;
         }
         return null;
+    }
+
+    private void addProduct() {
+        System.out.print("Product name: ");
+        String name = sc.nextLine().trim();
+        if (name.isEmpty()) {
+            System.out.println("Product name cannot be empty.");
+            return;
+        }
+        double price = readDouble("Price (VND): ");
+        int stock = readInt("Stock quantity: ");
+        if (price <= 0 || stock < 0) {
+            System.out.println("Price must be positive and stock cannot be negative.");
+            return;
+        }
+        String id = String.format("P%03d", nextProductId++);
+        products.add(new Product(id, name, price, stock));
+        System.out.println("Product added: " + id);
+    }
+
+    // ==================== PHẦN 3: GIỎ HÀNG CỦA KHÁCH ====================
+    private void customerMenu(Customer customer) {
+        while (true) {
+            System.out.println("\n===== CUSTOMER MENU =====");
+            System.out.println("1. View products");
+            System.out.println("2. Add product to cart");
+            System.out.println("3. View cart");
+            System.out.println("4. Checkout");
+            System.out.println("5. View order history");
+            System.out.println("6. Change password");
+            System.out.println("0. Logout");
+            int choice = readInt("Choose: ");
+            if (choice == 1) showProducts();
+            else if (choice == 2) addToCart(customer);
+            else if (choice == 3) showCart(customer);
+            else if (choice == 4) checkout(customer);
+            else if (choice == 5) showOrderHistory(customer);
+            else if (choice == 6) changePassword(customer);
+            else if (choice == 0) return;
+            else System.out.println("Invalid choice.");
+        }
     }
 
     private void addToCart(Customer customer) {
@@ -162,13 +195,13 @@ public class ShoppingOnlineSystem {
         System.out.printf("Total: %.0f VND%n", cart.getTotal());
     }
 
+    // ==================== PHẦN 4: ĐẶT HÀNG & THANH TOÁN ====================
     private void checkout(Customer customer) {
         Cart cart = customer.getCart();
         if (cart.isEmpty()) {
             System.out.println("Your cart is empty.");
             return;
         }
-        // Check stock again before creating the order.
         for (CartItem item : cart.getItems()) {
             if (item.getQuantity() > item.getProduct().getStock()) {
                 System.out.println("Not enough stock for " + item.getProduct().getName() + ".");
@@ -204,34 +237,7 @@ public class ShoppingOnlineSystem {
         }
     }
 
-    private void addProduct() {
-        System.out.print("Product name: ");
-        String name = sc.nextLine().trim();
-        if (name.isEmpty()) {
-            System.out.println("Product name cannot be empty.");
-            return;
-        }
-        double price = readDouble("Price (VND): ");
-        int stock = readInt("Stock quantity: ");
-        if (price <= 0 || stock < 0) {
-            System.out.println("Price must be positive and stock cannot be negative.");
-            return;
-        }
-        String id = String.format("P%03d", nextProductId++);
-        products.add(new Product(id, name, price, stock));
-        System.out.println("Product added: " + id);
-    }
-
-    private void changePassword(User user) {
-        System.out.print("Current password: ");
-        String oldPassword = sc.nextLine();
-        System.out.print("New password: ");
-        String newPassword = sc.nextLine();
-        if (user.changePassword(oldPassword, newPassword))
-            System.out.println("Password changed successfully.");
-        else System.out.println("Password change failed. Check your current password and new password.");
-    }
-
+    // Hàm đọc số nguyên và số thực an toàn (bắt lỗi NumberFormatException)
     private int readInt(String prompt) {
         while (true) {
             System.out.print(prompt);
